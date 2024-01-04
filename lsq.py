@@ -21,18 +21,20 @@ def get_arguments():
         type=str,
         choices=["umeyama", "malis",],
         default="malis",
-    )
-    parser.add_argument(
-        "--num-outliers",
-        type=int,
-        default=0,
+        help="LSQ algorithm to use.",
     )
     parser.add_argument(
         "--num-points",
         type=int,
         default=10,
+        help="The number of points.",
     )
-
+    parser.add_argument(
+        "--num-outliers",
+        type=int,
+        default=0,
+        help="The number of outliers.",
+    )
 
     return parser.parse_args()
 
