@@ -58,8 +58,12 @@ def from_q_to_r(q: np.ndarray) -> np.ndarray:
     ])
 
 
+def printif(*values, flag: bool = True):
+    if flag:
+        print(*values)
+
 def umeyama(
-    X: np.ndarray, Y: np.ndarray,
+    X: np.ndarray, Y: np.ndarray, verbose: bool = False,
 ) -> np.ndarray:
     """A closed-form solution for least square optimization
     via Umeyama algorithm
@@ -74,6 +78,8 @@ def umeyama(
         Array of target points.
         (d x N) matrix, where d is dimension
         and N is the number of correspondences
+    verbose : `bool`
+        Whether to print debug messages, by default False
 
     Returns
     -------
@@ -81,7 +87,7 @@ def umeyama(
         _description_
     """
     m, n = X.shape
-    print(m, n)
+    printif(m, n, flag=verbose)
 
     # Mean
     mx = X.mean(axis=1, keepdims=True)
@@ -125,6 +131,7 @@ def weighted_least_square(
     X: np.ndarray,
     Y: np.ndarray,
     W: Optional[np.ndarray] = None,
+    verbose: bool = False,
 ) -> np.ndarray:
     """A closed-form solution for weighted least square
     with point-to-point correspondences.
@@ -143,6 +150,8 @@ def weighted_least_square(
         _description_
     W : Optional[np.ndarray], optional
         N dimensional vector of weights, by default None
+    verbose : `bool`
+        Whether to print debug messages, by default False
 
     Returns
     -------
@@ -151,9 +160,12 @@ def weighted_least_square(
     """
     m_r_ten = copy.deepcopy(X.T)
     m_k_ten = copy.deepcopy(Y.T)
-    print(m_k_ten)
+    printif(m_k_ten, flag=verbose)
     M_k_ten = []
     W_k_ten = []
+
+    if W is None:
+        W = np.ones(X.shape[0])
 
     for k, (m_r, m_k) in enumerate(zip(m_r_ten, m_k_ten)):
         # Weight -> Diag. matrix
@@ -220,8 +232,8 @@ def weighted_least_square(
         [b_r[3]-b_r[1], b_r[2]+b_r[6], b_r[5]+b_r[7], 2 * b_r[8]],
     ])
     eigval, eigvec = np.linalg.eig(B)
-    print(eigval)
-    print(eigvec)
+    printif(eigval, flag=verbose)
+    printif(eigvec, flag=verbose)
 
     min_index = np.argmin(eigval)
     min_vec = eigvec[:, min_index]
