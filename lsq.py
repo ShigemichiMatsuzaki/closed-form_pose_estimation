@@ -1,13 +1,13 @@
+from mpl_toolkits.mplot3d import axes3d, Axes3D
+from matplotlib import pyplot as plt
+import transforms3d as t3d
+from scipy.spatial.transform import Rotation
 import argparse
 import copy
 from distutils.util import strtobool
 from typing import Optional
 import numpy as np
 np.set_printoptions(threshold=100, linewidth=1000)
-from scipy.spatial.transform import Rotation
-import transforms3d as t3d
-from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import axes3d, Axes3D
 
 
 def get_arguments():
@@ -38,9 +38,11 @@ def get_arguments():
 
     return parser.parse_args()
 
+
 def from_r_to_q(r: np.ndarray) -> np.ndarray:
     R = np.reshape(r, (3, 3))
     return Rotation.from_matrix(R).as_quat()
+
 
 def from_q_to_r(q: np.ndarray) -> np.ndarray:
     r11 = 2 * (q[0]**2 + q[1]**2) - 1
@@ -61,6 +63,7 @@ def from_q_to_r(q: np.ndarray) -> np.ndarray:
 def printif(*values, flag: bool = True):
     if flag:
         print(*values)
+
 
 def umeyama(
     X: np.ndarray, Y: np.ndarray, verbose: bool = False,
@@ -202,12 +205,12 @@ def weighted_least_square(
 
     W_k_sum_inv = np.linalg.inv(W_k_sum)
 
-    A_t = -W_k_sum_inv @ WM_k_sum # eq. (20)
-    b_t = W_k_sum_inv @ Wm_k_sum # eq. (21)
+    A_t = -W_k_sum_inv @ WM_k_sum  # eq. (20)
+    b_t = W_k_sum_inv @ Wm_k_sum  # eq. (21)
 
     # eq. (22), (23)
-    M_bar_k_ten = M_k_ten + A_t # eq. (22)      
-    m_bar_k_ten = m_k_ten - b_t # eq. (23)      
+    M_bar_k_ten = M_k_ten + A_t  # eq. (22)
+    m_bar_k_ten = m_k_ten - b_t  # eq. (23)
 
     # Transpose each matrix in M_bar_k_ten_t
     # Use of '.T' leads to unexpected results
@@ -226,7 +229,8 @@ def weighted_least_square(
     # The derivation of B can be found in "loss_function_derivation.ipynb".
     # Refer Malis (2023) for further details.
     B = np.array([
-        [2 * (b_r[0]+b_r[4]+b_r[8]), b_r[7]-b_r[5], b_r[2]-b_r[6], b_r[3]-b_r[1]],
+        [2 * (b_r[0]+b_r[4]+b_r[8]), b_r[7] -
+         b_r[5], b_r[2]-b_r[6], b_r[3]-b_r[1]],
         [b_r[7]-b_r[5], 2 * b_r[0], b_r[1]+b_r[3], b_r[2]+b_r[6]],
         [b_r[2]-b_r[6], b_r[1]+b_r[3], 2 * b_r[4], b_r[5]+b_r[7]],
         [b_r[3]-b_r[1], b_r[2]+b_r[6], b_r[5]+b_r[7], 2 * b_r[8]],
@@ -243,7 +247,7 @@ def weighted_least_square(
     #
     # Translation
     #
-    t = A_t @ r + b_t # eq. (19)
+    t = A_t @ r + b_t  # eq. (19)
 
     T = np.identity(4)
     T[:3, :3] = r.reshape((3, 3))
@@ -264,8 +268,8 @@ if __name__ == "__main__":
     a = np.random.rand(dim, N,)
 
     # Randomly initialize a transformation
-    rand_trans = np.random.rand(dim) 
-    rand_rot = Rotation.random().as_matrix() 
+    rand_trans = np.random.rand(dim)
+    rand_rot = Rotation.random().as_matrix()
     T = t3d.affines.compose(
         rand_trans,
         rand_rot,
@@ -323,11 +327,11 @@ if __name__ == "__main__":
     # Generate figure
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1, projection='3d')
-    
+
     # Plot points
-    ax.scatter(a[0,:], a[1,:], a[2, :], c='b')
-    ax.scatter(b[0,:], b[1,:], b[2, :], c='r')
-    ax.scatter(b_estim[0,:], b_estim[1,:], b_estim[2, :], c='y')
-    
+    ax.scatter(a[0, :], a[1, :], a[2, :], c='b')
+    ax.scatter(b[0, :], b[1, :], b[2, :], c='r')
+    ax.scatter(b_estim[0, :], b_estim[1, :], b_estim[2, :], c='y')
+
     # Show the figure
     plt.show()
